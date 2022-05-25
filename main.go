@@ -2,40 +2,40 @@ package main
 
 import (
 	"fmt"	
-	"time"
 )
 
-func main() {
-	c1:= make(chan string)
-	c2 := make(chan string)
+func main() {	
 
-	go func() {
-		for {
-			c1 <- "Every 500ms"
-			time.Sleep(time.Millisecond * 500)			
-		}
-	}()
+	jobs := make(chan int, 50)
+	results:= make(chan int, 50)
 
-	go func() {
-		for {
-			c2 <- "Every two seconds"
-			time.Sleep(time.Second * 2)			
-		}
-	}()
+	go worker(jobs, results)
+	go worker(jobs, results)
+	go worker(jobs, results)
+	go worker(jobs, results)
 
-	// for { //This will block the fastest channel waiting for the slow channel to receive
-	// 	fmt.Println(<- c1)
-	// 	fmt.Println(<- c2)
-	// }
+	for i := 0; i < 50; i++ {
+		jobs <- i
+	}
+	close(jobs)
 
-	for { 
-		select {
-		case msg1 := <- c1:
-			fmt.Println(msg1)
-		case msg2 := <- c2:
-			fmt.Println(msg2)
-		}		
+	for j:= 0; j<50; j++ {
+		fmt.Println(<-results)
 	}
 	
+}
+
+func worker(jobs <-chan int, results chan <- int) {
+	for n:= range jobs {
+		results <- fib(n)
+	}
+}
+
+func fib(n int) int {
+	if n <= 1 {
+		return n
+	}
+
+	return fib(n-1) + fib(n-2)
 }
 
