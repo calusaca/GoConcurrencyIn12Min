@@ -1,29 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"fmt"	
 )
 
 func main() {
-	c := make(chan string)
-	go count("sheep", c)
+	c := make(chan string, 2) //buffer channel not needed someone to read before sending 
+	c <- "hello"
+	c <- "world"
 
-	for msg:= range c { 
-		//msg, open := <- c
-		// if !open {
-		// 	break
-		// }
-		fmt.Println(msg)
-	}
+	msg := <- c
+	fmt.Println(msg)
+
+	msg = <- c
+	fmt.Println(msg)
+	
 }
 
-func count(thing string, c chan string) {  //String channel to communicate to the main routine
-	for i:= 1; i <= 5; i++ {		
-		c <- thing		
-		time.Sleep(time.Millisecond * 500)
-	}
-	close(c)
-
-
-}
